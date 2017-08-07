@@ -7,6 +7,7 @@ val akkaVersion = "2.5.3"
 
 libraryDependencies ++= {
   Seq(
-    "org.apache.spark" %% "spark-sql" % "2.2.0"
+    "com.typesafe.akka" % "akka-actor_2.11" % akkaVersion,
+    "com.typesafe.akka" % "akka-stream_2.11" % akkaVersion
   )
 }
