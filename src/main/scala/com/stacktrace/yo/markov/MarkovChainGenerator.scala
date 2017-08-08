@@ -6,9 +6,6 @@ import akka.actor.ActorSystem
 import akka.stream.scaladsl.{FileIO, Flow, Framing, Source}
 import akka.stream.{ActorMaterializer, IOResult}
 import akka.util.ByteString
-import akka.{Done, NotUsed}
-import com.stacktrace.yo.domain.TrumpTweet
-import io.circe.Decoder
 
 import scala.concurrent.Future
 
@@ -18,7 +15,6 @@ object MarkovChainGenerator extends App {
   implicit val as = ActorSystem()
   implicit val ec = as.dispatcher
   implicit val mat = ActorMaterializer()
-  implicit val decoderBar: Decoder[List[TrumpTweet]] = Decoder[List[TrumpTweet]]
 
 
   val input = "src/main/resources/data/trumptweets.txt"
@@ -28,13 +24,26 @@ object MarkovChainGenerator extends App {
     .via(Framing.delimiter(ByteString("\n"), 1024, allowTruncation = true))
     .map(_.utf8String)
 
-  val frequencyMap = scala.collection.mutable.HashMap[String, ProbabilityDistribution[String]]()
-
-
-  val flow = Flow[String]
+  val generateChains = Flow[String]
     .map(line => {
-
+      new MarkovTextChain(line).generate()
     })
+
+
+  inputSource
+    .via(generateChains)
+    .via(Flow[MarkovTextChain#FrequencyMap]
+      .map(freq =>
+        freq.foreach(tuple => {
+          println("\"" + tuple._1 + "\"" + " has distribution")
+          tuple._2.getDistributions
+            .foreach(tuple2 => {
+              println(tuple2._1 + " : " + tuple._2.getProbabilityOfKey(tuple2._1))
+            })
+          println
+        })
+      )
+    ).runForeach(x => x)
 
 
 }
