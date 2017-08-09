@@ -10,18 +10,20 @@ class MarkovChain[T](distribution: FrequencyMap[T]) {
 
   val random: Random = new Random(System.nanoTime())
 
-  def generate(maxCount: Int, countChars: Boolean = false): List[T] = {
+  def generate(maxCount: Int = Int.MaxValue): List[T] = {
     var tokenList = ListBuffer[T]()
     var (token, currentDist) = getRandom
+    var continue = true
     tokenList += token
     Iterator.iterate(tokenList) { tokenList =>
       distribution.get(tokenList.last) match {
         case None =>
+          continue = false
         case Some(v) =>
           tokenList += v.getNext
       }
       tokenList
-    }.takeWhile(_.size < maxCount).foreach(identity)
+    }.takeWhile(_.size <= maxCount && continue).foreach(identity)
     tokenList.toList
   }
 

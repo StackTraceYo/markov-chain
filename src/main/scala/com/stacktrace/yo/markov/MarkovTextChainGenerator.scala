@@ -2,8 +2,6 @@ package com.stacktrace.yo.markov
 
 import java.io.InputStream
 
-import com.stacktrace.yo.markov.MarkovTextChainGenerator._
-
 import scala.collection.immutable.Queue
 import scala.collection.mutable
 import scala.io.Source
@@ -32,8 +30,6 @@ class MarkovTextChainGenerator(order: Integer = 1) {
           .split(" ")
           .toList
           .map(_.trim.toLowerCase)
-//          .filter(twitterStuff)
-          .map(normalize)
           .filter(whiteSpace): _*
       )
 
@@ -59,24 +55,8 @@ class MarkovTextChainGenerator(order: Integer = 1) {
     frequencyMap
   }
 
-  private def twitterStuff(in: String): Boolean = {
-    val matches = dropList.map(_.findFirstIn(in).isDefined)
-
-    !matches.contains(true)
-  }
-
   private def whiteSpace(in: String): Boolean = {
     !in.trim.isEmpty
-  }
-
-  private def normalize(in: String): String = {
-    in.trim.toLowerCase
-      .replaceAll("""([\p{Punct}&&[^.$]]|\b\p{IsLetter}{1,2}\b)\s*""", "")
-      .replaceAll("'|’|-|\"|`|~|“|\\.+|", "")
-      .stripSuffix("-")
-      .stripSuffix("'")
-      .stripSuffix("...")
-      .stripSuffix("..")
   }
 
   private def mergeDistributions(left: FrequencyMap[String], right: FrequencyMap[String]) = {
@@ -99,7 +79,5 @@ object MarkovTextChainGenerator {
   val twitterMention: Regex = "\\.@[^\\s]+".r
   val twitterHash: Regex = "\\.#[^\\s]+".r
   val dateTime: Regex = "\\d+[\\.,:]+\\d+".r
-
-  val dropList = List(extLink, twitterMention, dateTime)
 }
 
