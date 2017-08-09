@@ -1,6 +1,7 @@
 package com.stacktrace.yo.markov
 
 import scala.collection.mutable
+import scala.util.Random
 
 /**
   * Created by Stacktraceyo on 8/7/17.
@@ -8,9 +9,24 @@ import scala.collection.mutable
 class MarcovChainProbabilityDistribution[T](initRecord: T = null, initCount: Int = 1) {
 
   private lazy val distributionRecords: mutable.HashMap[T, Int] = mutable.HashMap[T, Int]()
+  private lazy val distRandom = new Random(System.nanoTime())
 
   if (initRecord != null) {
     record(initRecord, initCount)
+  }
+
+  def getNext: T = {
+    pickNextToken(distRandom.nextInt(getTotal))
+  }
+
+  private def pickNextToken(roll: Int): T = {
+    var current = 0
+    val x = for (disRecord <- distributionRecords if roll >= current) {
+      if (roll < current + disRecord._2) return disRecord._1 else {
+        current += disRecord._2
+      }
+    }
+    throw new IllegalStateException("Probabilities Did Not Add Up Properly")
   }
 
   def record(in: T, count: Int = 1): mutable.HashMap[T, Int] = {

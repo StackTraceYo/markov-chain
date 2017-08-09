@@ -5,7 +5,7 @@ package com.stacktrace.yo
   */
 package object markov {
 
-  type FrequencyMap[T] = scala.collection.mutable.HashMap[String, MarcovChainProbabilityDistribution[T]]
+  type FrequencyMap[T] = scala.collection.mutable.HashMap[T, MarcovChainProbabilityDistribution[T]]
 
   def createMarkovChain[T](distribution: FrequencyMap[T]): MarkovChain[T] = new MarkovChain[T](distribution)
 
